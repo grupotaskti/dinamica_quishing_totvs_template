@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOTVS Linha RM - Painel de Dados & Inteligência de Máquinas</title>
+  
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Segoe+UI&display=swap" rel="stylesheet">
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/metricas.css">
+  <!-- Favicon e Ícone da Janela do Navegador -->
+  <link rel="icon" href="assets/img/totvs_icon.png" type="image/png">
+  <link rel="shortcut icon" href="assets/img/totvs_icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/totvs_icon.png">
+</head>
+<body>
+
+  <!-- Barra Superior Administrativa / Oculta -->
+  <header class="admin-navbar">
+    <div class="navbar-container">
+      <div class="brand-section">
+        <img src="assets/img/Logo-CDC-Horizontal_verde.png" alt="CDC Security" class="navbar-logo">
+        <div class="brand-text">
+          <h1>
+            Painel de Inteligência de Dispositivos 
+            <span class="secret-badge">Página Oculta</span>
+          </h1>
+          <p>Mapeamento de dados das máquinas que acessaram a aplicação</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a href="index.html" class="btn-nav btn-back" title="Voltar para a página de login">
+          <span>← Voltar para a Tela de Acesso</span>
+        </a>
+        <button type="button" class="btn-nav btn-primary" id="btnRefresh">
+          <span>🔄 Atualizar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="dashboard-container">
+
+    <!-- Linha de KPIs Rápidos -->
+    <section class="kpi-row">
+      <div class="kpi-card highlight">
+        <div class="kpi-icon-box">🖥️</div>
+        <div class="kpi-content">
+          <span class="kpi-num" id="kpiUniqueMachines">1</span>
+          <span class="kpi-desc">Máquinas Únicas</span>
+          <span class="kpi-detail">Dispositivos distintos detectados</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box">📝</div>
+        <div class="kpi-content">
+          <span class="kpi-num" id="kpiTestsCount">0</span>
+          <span class="kpi-desc">Testes de Acesso</span>
+          <span class="kpi-detail">Envios de formulário registrados</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box">⏱️</div>
+        <div class="kpi-content">
+          <span class="kpi-num" id="kpiActiveTime">00:00</span>
+          <span class="kpi-desc">Tempo Ativo</span>
+          <span class="kpi-detail">Duração contínua da sessão</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 1: Tabela de Dados Adquiridos das Máquinas -->
+    <section class="section-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">
+            <span>📋 Tabela de Dados Adquiridos das Máquinas</span>
+            <span class="badge" id="machinesCountBadge" style="background:#0C9ABE; color:#fff; padding: 2px 8px; border-radius: 12px; font-size: 12px;">1 máquina</span>
+          </h2>
+          <p class="panel-subtitle">Lista de todos os computadores que já acessaram a tela de acesso, com parâmetros extraídos pelo navegador:</p>
+        </div>
+
+        <div class="panel-toolbar">
+          <button type="button" class="btn-action success" id="btnSimulateMachine">
+            <span>➕ Simular Nova Máquina</span>
+          </button>
+          <button type="button" class="btn-action" id="btnExportCSV">
+            <span>📥 Exportar CSV</span>
+          </button>
+          <button type="button" class="btn-action" id="btnExportJSON">
+            <span>📥 Exportar JSON</span>
+          </button>
+          <button type="button" class="btn-action danger" id="btnResetAll">
+            <span>🗑️ Resetar Dados</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabela com Rolagem Horizontal -->
+      <div class="table-container">
+        <table class="data-table" id="machinesTable">
+          <thead>
+            <tr>
+              <th>ID da Máquina</th>
+              <th>Endereço IP</th>
+              <th>Hostname / Rede</th>
+              <th>Sistema Operacional</th>
+              <th>Navegador / Engine</th>
+              <th>Resolução Física</th>
+              <th>Viewport Ativo</th>
+              <th>Densidade (DPR)</th>
+              <th>Idioma</th>
+              <th>Fuso Horário</th>
+              <th>Hardware (CPU/RAM)</th>
+              <th>Tipo de Entrada</th>
+              <th>Status Rede</th>
+              <th>Hash Fingerprint</th>
+              <th>Qtd. Acessos</th>
+              <th>Primeiro Acesso</th>
+              <th>Último Acesso</th>
+            </tr>
+          </thead>
+          <tbody id="machinesTableBody">
+            <!-- Linhas renderizadas via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Seção 2: O Que Pode Ser Reaproveitado -->
+    <section class="section-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">
+            <span>💡 O Que Pode Ser Reaproveitado Desses Dados?</span>
+          </h2>
+          <p class="panel-subtitle">Análise técnica e prática de usabilidade, personalização e dinâmicas de segurança utilizando os dados capturados:</p>
+        </div>
+      </div>
+
+      <div class="reuse-grid">
+        
+        <!-- Card 1 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">📱</span>
+            <div>
+              <h3 class="reuse-title">Viewport & Resolução de Tela</h3>
+              <span class="reuse-tag">Responsividade & Layout</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Identifica a área visual útil do dispositivo. Permite saber se o usuário está em desktop ultrawide, tela padrão ou smartphone.
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> Adaptar o formulário automaticamente (ex: borda de cartão no mobile vs. tela aberta no desktop), redimensionar fontes e evitar scroll desnecessário.
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">👆</span>
+            <div>
+              <h3 class="reuse-title">Tipo de Entrada (Touch vs. Mouse)</h3>
+              <span class="reuse-tag">Ergonomia & Usabilidade</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Detecta se o dispositivo possui touchscreen ativo (`navigator.maxTouchPoints > 0`).
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> Expandir a área de clique de botões e inputs para o padrão ergonômico WCAG (mínimo de 44x44px) em telas de toque, e manter maior densidade no mouse.
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">🌐</span>
+            <div>
+              <h3 class="reuse-title">Idioma e Fuso Horário Local</h3>
+              <span class="reuse-tag">Regionalização Automática</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Obtém `navigator.language` (ex: pt-BR) e `Intl.DateTimeFormat().timeZone` (ex: America/Sao_Paulo).
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> Pré-selecionar o formato de data (DD/MM/AAAA), moeda e ajustar automaticamente registros de ponto e logs de acesso sem perguntar ao usuário.
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">⚡</span>
+            <div>
+              <h3 class="reuse-title">Capacidade de Hardware (CPU & RAM)</h3>
+              <span class="reuse-tag">Otimização de Desempenho</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Informa quantidade de núcleos de processamento (`hardwareConcurrency`) e estimativa de memória RAM (`deviceMemory`).
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> Desativar transições complexas ou animações pesadas caso a máquina do usuário possua poucos recursos, priorizando fluidez de resposta.
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">🏢</span>
+            <div>
+              <h3 class="reuse-title">Sistema Operacional & Ambiente</h3>
+              <span class="reuse-tag">Pré-configuração de Acesso</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Distingue estações corporativas Windows de aparelhos móveis Android/iOS ou computadores macOS/Linux.
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> No caso do TOTVS Linha RM, pode pré-selecionar a base de dados corporativa (`CorporeRM Produção`) quando vindo de Windows de rede corporativa.
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="reuse-card">
+          <div class="reuse-header">
+            <span class="reuse-icon">🛡️</span>
+            <div>
+              <h3 class="reuse-title">Assinatura Digital de Máquina (Fingerprint)</h3>
+              <span class="reuse-tag">Auditoria & Segurança</span>
+            </div>
+          </div>
+          <p class="reuse-text">
+            Gera um identificador baseado no Canvas 2D, resolução e ambiente que persiste mesmo que cookies sejam excluídos.
+          </p>
+          <div class="reuse-applications">
+            <strong>Como reaproveitar:</strong> Notificar o usuário caso o mesmo perfil tente autenticar a partir de uma máquina nunca antes vista (prevenção contra credenciais comprometidas).
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Seção 3: Histórico de Testes Submetidos -->
+    <section class="section-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">
+            <span>📜 Histórico de Tentativas de Autenticação</span>
+          </h2>
+          <p class="panel-subtitle">Como o fim é meramente de teste, nenhuma informação confidencial ou senha é guardada. Registra-se apenas o horário da tentativa com o usuário censurado/nublado:</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="testsTable">
+          <thead>
+            <tr>
+              <th style="width: 180px;">Horário da Tentativa</th>
+              <th>Usuário de Acesso (Nublado / Censurado)</th>
+              <th style="width: 220px;">Status / Registro</th>
+            </tr>
+          </thead>
+          <tbody id="testsTableBody">
+            <!-- Renderizado dinamicamente com efeito de blur -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast para feedback rápido -->
+  <div id="adminToast" class="toast-msg">Mensagem</div>
+
+  <!-- Scripts -->
+  <script src="js/fingerprint.js"></script>
+  <script src="js/tracker.js"></script>
+  <script src="js/metricas.js"></script>
+</body>
+</html>

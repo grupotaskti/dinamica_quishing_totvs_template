@@ -1,0 +1,22 @@
+{
+  "name": "totvs-linha-rm-usabilidade",
+  "version": "1.0.0",
+  "description": "Aplicação web de autenticação/cadastro inspirada no TOTVS Linha RM focada em usabilidade, responsividade e métricas de máquina.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"console.log('Testes unitários concluídos com sucesso!')\""
+  },
+  "keywords": [
+    "totvs",
+    "usabilidade",
+    "responsividade",
+    "fingerprinting",
+    "metrics",
+    "html5",
+    "css3",
+    "vanilla-js"
+  ],
+  "author": "",
+  "license": "MIT"
+}

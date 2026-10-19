@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOTVS Linha RM - Boas-vindas</title>
+  
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Segoe+UI&display=swap" rel="stylesheet">
+  
+  <!-- Estilos principais -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Favicon e Ícone da Janela do Navegador -->
+  <link rel="icon" href="assets/img/totvs_icon.png" type="image/png">
+  <link rel="shortcut icon" href="assets/img/totvs_icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/totvs_icon.png">
+</head>
+<body>
+
+  <!-- Container Principal da Aplicação (Layout idêntico à tela oficial do TOTVS Linha RM) -->
+  <main class="page-container" id="pageWrapper">
+    <div class="auth-card" id="authCard">
+      
+      <!-- Topo: Logo TOTVS -->
+      <header class="card-header">
+        <img src="assets/img/totvs_logo.png" alt="Logotipo TOTVS" class="totvs-header-logo">
+        <h1 class="system-title">Linha RM</h1>
+        <h2 class="welcome-subtitle">Boas-vindas</h2>
+      </header>
+
+      <!-- Formulário de Autenticação / Cadastro -->
+      <form id="loginForm" class="auth-form" novalidate>
+        
+        <!-- Campo: Usuário ou E-mail -->
+        <div class="input-group">
+          <label for="usernameInput" class="sr-only">Insira seu Usuário ou E-mail</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <img src="assets/img/icon_pessoa.png" alt="" aria-hidden="true" class="icon-img">
+            </span>
+            <input 
+              type="text" 
+              id="usernameInput" 
+              name="username" 
+              class="form-control" 
+              placeholder="Insira seu Usuário ou E-mail"
+              autocomplete="username"
+              required
+              aria-required="true"
+            >
+          </div>
+          <div class="field-feedback" id="usernameFeedback" role="alert"></div>
+        </div>
+
+        <!-- Campo: Senha -->
+        <div class="input-group">
+          <label for="passwordInput" class="sr-only">Insira sua Senha</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <img src="assets/img/icon_cadeado.png" alt="" aria-hidden="true" class="icon-img">
+            </span>
+            <input 
+              type="password" 
+              id="passwordInput" 
+              name="password" 
+              class="form-control" 
+              placeholder="Insira sua Senha"
+              autocomplete="current-password"
+              required
+              aria-required="true"
+            >
+            <!-- Usabilidade: Botão para visualizar/ocultar senha -->
+            <button 
+              type="button" 
+              class="password-toggle-btn" 
+              id="passwordToggleBtn" 
+              aria-label="Mostrar ou ocultar senha" 
+              title="Mostrar senha"
+            >
+              <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <!-- Alerta de CapsLock ativo -->
+          <div class="caps-warning" id="capsWarning" style="display: none;">
+            ⚠️ Atenção: A tecla <strong>Caps Lock</strong> está ativada.
+          </div>
+          <div class="field-feedback" id="passwordFeedback" role="alert"></div>
+        </div>
+
+        <!-- Campo: Base / Ambiente (Select) -->
+        <div class="input-group">
+          <label for="databaseSelect" class="sr-only">Selecione o Ambiente</label>
+          <div class="input-wrapper select-wrapper">
+            <span class="input-icon">
+              <img src="assets/img/icon_dados.png" alt="" aria-hidden="true" class="icon-img">
+            </span>
+            <select id="databaseSelect" name="database" class="form-control select-control" aria-label="Base de Dados">
+              <option value="CorporeRM" selected>CorporeRM</option>
+              <option value="CorporeRM_Homologacao">CorporeRM - Homologação</option>
+              <option value="CorporeRM_Treinamento">CorporeRM - Treinamento</option>
+              <option value="CorporeRM_Desenvolvimento">CorporeRM - Desenvolvimento</option>
+            </select>
+            <span class="select-chevron" aria-hidden="true">▼</span>
+          </div>
+        </div>
+
+        <!-- Botão Acessar -->
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          <span class="btn-spinner" id="btnSpinner" aria-hidden="true"></span>
+          <span class="btn-label" id="btnLabel">Acessar</span>
+        </button>
+
+        <!-- Link Esqueceu sua senha? -->
+        <div class="forgot-password-box">
+          <a href="https://portalrh.grupomadero.com.br/Corpore.Net/Login.aspx" target="_blank" rel="noopener noreferrer" id="forgotPasswordLink" class="link-forgot">Esqueceu sua senha?</a>
+        </div>
+
+      </form>
+
+      <!-- Divisória visual -->
+      <hr class="card-divider" aria-hidden="true">
+
+      <!-- Rodapé do Card: Links Secundários Atualizados -->
+      <footer class="card-footer">
+        <nav class="footer-nav" aria-label="Links auxiliares">
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLScPeXUPg9OnaJoDD22iFOSoyRvqOcobZ6caP8yeh2eoROCdiA/closedform" target="_blank" rel="noopener noreferrer" class="footer-link" title="TOTVS RH - ATRAÇÃO DE TALENTOS">Conheça o ATS</a>
+          <a href="https://portalrh.grupomadero.com.br/Corpore.Net/Source/Tst-Avaliacao/RM.Tst.Provas/Public/TstNewMain.aspx" target="_blank" rel="noopener noreferrer" class="footer-link" title="Gestão de Conhecimento">Executor Web</a>
+          <a href="https://portalrh.grupomadero.com.br/Corpore.Net/Source/CRM/RM.CRM.Forum/CRMForumExterno.aspx?ACESSO=0" target="_blank" rel="noopener noreferrer" class="footer-link" title="ErrorPage">Forum</a>
+          <a href="https://portalrh.grupomadero.com.br/Corpore.Net/Source/Rpt-GeradorRelatoriosNet/RM.Rpt.Reports/Anonymous/RptFindReportByGuid.aspx" target="_blank" rel="noopener noreferrer" class="footer-link" title="portalrh.grupomadero.com.br/Corpore.Net/Source/Rpt-GeradorRelatoriosNet/RM.Rpt.Reports/Anonymous/RptFindReportByGuid.aspx">Certificador de Relatórios</a>
+        </nav>
+
+        <!-- Logotipo TOTVS Cinza no rodapé (Acesso secreto: duplo clique abre a página oculta de métricas) -->
+        <div class="footer-brand" id="secretAdminTrigger" title="TOTVS" style="cursor: default;">
+          <img src="assets/img/totvs_cinza.png" alt="TOTVS" class="totvs-footer-logo">
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Notificação Toast para feedback de usabilidade -->
+  <div id="toastNotification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-icon" id="toastIcon">ℹ️</div>
+    <div class="toast-body">
+      <strong id="toastTitle" class="toast-title">Notificação</strong>
+      <p id="toastMessage" class="toast-message">Mensagem do sistema</p>
+    </div>
+    <button type="button" class="toast-close" id="toastCloseBtn" aria-label="Fechar">✕</button>
+  </div>
+
+  <!-- Scripts (executados silenciosamente para coletar os dados da máquina e registrar o acesso) -->
+  <script src="js/fingerprint.js"></script>
+  <script src="js/tracker.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
