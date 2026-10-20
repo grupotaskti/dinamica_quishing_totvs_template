@@ -198,7 +198,13 @@ const server = http.createServer((req, res) => {
       current.uniqueMachinesCount = current.machines.length;
       current.totalVisits = (current.totalVisits || 0) + 1;
 
-      saveDataFile(current);
+      if (!saveDataFile(current)) {
+  sendJsonResponse(500, {
+    success: false,
+    message: 'Não foi possível persistir o registro.'
+  });
+  return;
+}
       console.log(`📝 [SERVER] Máquina registrada/atualizada no JSON: ${payload.id} (Total: ${current.uniqueMachinesCount})`);
       sendJsonResponse(200, { success: true, data: current });
     });
@@ -230,49 +236,38 @@ const server = http.createServer((req, res) => {
         current.tests.pop();
       }
 
-      saveDataFile(current);
+      if (!saveDataFile(current)) {
+        sendJsonResponse(500, {
+          success: false,
+          message: 'Não foi possível persistir o registro.'
+        });
+        return;
+      }
       console.log(`🔐 [SERVER] Tentativa de teste salva no JSON: ${testRecord.timeOnly} (${testRecord.maskedUser})`);
       sendJsonResponse(200, { success: true, test: testRecord, data: current });
     });
     return;
   }
 
-  // 5. Endpoint para salvar/sincronizar dados completos no arquivo JSON
-  if (reqPath === '/api/sync' && req.method === 'POST') {
-    parseRequestBody(req, (err, payload) => {
-      if (err) {
-        sendJsonResponse(400, { success: false, message: 'JSON inválido' });
-        return;
-      }
-
-      const current = readDataFile();
-      if (Array.isArray(payload.machines)) {
-        current.machines = payload.machines;
-        current.uniqueMachinesCount = payload.machines.length;
-      }
-      if (Array.isArray(payload.tests)) {
-        current.tests = payload.tests;
-      }
-      if (typeof payload.totalVisits === 'number') {
-        current.totalVisits = payload.totalVisits;
-      }
-
-      const saved = saveDataFile(current);
-      sendJsonResponse(200, { success: saved, data: current });
-    });
-    return;
-  }
 
   // 6. Endpoint de limpeza do arquivo JSON (acionado pelo botão "Atualizar" ou manualmente)
-  if ((reqPath === '/api/clear' || reqPath === '/api/clear-data') && (req.method === 'POST' || req.method === 'GET')) {
-    const cleanData = clearDataFile();
-    sendJsonResponse(200, {
-      success: true,
-      message: 'Arquivo JSON limpo com sucesso para novo ciclo de teste.',
-      data: cleanData
+  if (reqPath === '/api/clear' && req.method === 'POST') {
+  const cleanData = clearDataFile();
+
+  if (!cleanData) {
+    sendJsonResponse(500, {
+      success: false,
+      message: 'Não foi possível limpar os registros.'
     });
     return;
   }
+
+  sendJsonResponse(200, {
+    success: true,
+    data: cleanData
+  });
+  return;
+}
 
   // ========================================================
   // SERVINDO ARQUIVOS ESTÁTICOS

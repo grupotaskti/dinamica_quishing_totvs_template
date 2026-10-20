@@ -83,20 +83,36 @@ const AccessTracker = (() => {
     notifyListeners();
   }
 
+  async function requestJson(endpoint, options = {}) {
+  const response = await fetch(endpoint, {
+    ...options,
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
+    throw new Error(`${endpoint}: HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+
+  if (!result || result.success === false) {
+    throw new Error(`${endpoint}: operação não confirmada`);
+  }
+
+  return result;
+}
+
   // Busca dados consolidados do servidor (JSON)
   async function fetchServerData() {
-    try {
-      const res = await fetch('/api/data', { cache: 'no-cache' });
-      if (res.ok) {
-        const data = await res.json();
-        applyServerData(data);
-        return data;
-      }
-    } catch (err) {
-      // Falha de rede ou executando estático
-    }
-    return null;
+  const data = await requestJson('/api/data');
+
+  if (!Array.isArray(data.machines) || !Array.isArray(data.tests)) {
+    throw new Error('Resposta de métricas inválida');
   }
+
+  applyServerData(data);
+  return data;
+}
 
   // Registra o acesso da máquina e sincroniza no arquivo JSON do servidor
   async function recordAccess() {
@@ -136,60 +152,34 @@ const AccessTracker = (() => {
       isSimulated: false
     };
 
-    // Atualiza estado local no navegador
-    let machines = loadJSON(STORAGE_KEYS.MACHINES, []);
-    let totalVisits = parseInt(localStorage.getItem(STORAGE_KEYS.TOTAL_VISITS) || '0', 10) + 1;
-    localStorage.setItem(STORAGE_KEYS.TOTAL_VISITS, totalVisits.toString());
+    const result = await requestJson('/api/record-machine', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(machineRecord)
+  });
 
-    const existingIdx = machines.findIndex(m => m.id === currentMachineId);
-    if (existingIdx >= 0) {
-      machines[existingIdx].visitsCount = (machines[existingIdx].visitsCount || 1) + 1;
-      machines[existingIdx].lastSeen = now;
-      machines[existingIdx].viewport = deviceInfo.viewport;
-      machines[existingIdx].isOnline = deviceInfo.isOnline;
-      if (netInfo.ip) machines[existingIdx].ip = netInfo.ip;
-      if (netInfo.hostname) machines[existingIdx].hostname = netInfo.hostname;
-    } else {
-      machines.push(machineRecord);
+  applyServerData(result.data);
     }
-    saveJSON(STORAGE_KEYS.MACHINES, machines);
-    notifyListeners();
 
-    // Sincroniza com o servidor no arquivo JSON
-    try {
-      const res = await fetch('/api/record-machine', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(machineRecord)
-      });
-      if (res.ok) {
-        const result = await res.json();
-        if (result && result.data) {
-          applyServerData(result.data);
-        }
-      }
-    } catch (e) {
-      console.warn('Aviso: servidor não respondeu para salvar máquina no JSON.', e);
-    }
+    // Registra tentativa de autenticação com privacidade estrita e salva no JSON do servidor
+    async function recordTest(testInfo = {}) {
+    const result = await requestJson('/api/record-test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        maskedUser: maskUser(testInfo.rawUser || ''),
+        status: 'Tentativa Registrada (Teste)',
+        machineId: DeviceInfo.getMachineId()
+      })
+    });
+
+    applyServerData(result.data);
+    return result.test;
   }
-
-  // Registra tentativa de autenticação com privacidade estrita e salva no JSON do servidor
-  function recordTest(testInfo) {
-    let testsCount = parseInt(localStorage.getItem(STORAGE_KEYS.TESTS_COUNT) || '0', 10) + 1;
-    localStorage.setItem(STORAGE_KEYS.TESTS_COUNT, testsCount.toString());
-
-    const currentMachineId = DeviceInfo.getMachineId();
-    const timeOnly = new Date().toLocaleTimeString('pt-BR');
-    const masked = maskUser(testInfo.rawUser || testInfo.username || 'usuario');
-
-    const record = {
-      id: 'TENT-' + Date.now().toString(36).toUpperCase(),
-      timeOnly: timeOnly,
-      timestamp: new Date().toISOString(),
-      maskedUser: masked,
-      status: 'Tentativa Registrada (Teste)',
-      machineId: currentMachineId
-    };
 
     let history = loadJSON(STORAGE_KEYS.TESTS_HISTORY, []);
     history.unshift(record);
@@ -280,22 +270,18 @@ const AccessTracker = (() => {
 
   // Limpa o arquivo JSON no servidor e zera o estado local para novo ciclo de testes práticos
   async function clearServerData() {
-    // 1. Limpa arquivo JSON no servidor
-    try {
-      await fetch('/api/clear', { method: 'POST' });
-    } catch (e) {
-      console.warn('Erro ao limpar arquivo no servidor:', e);
+    const result = await requestJson('/api/clear', {
+      method: 'POST'
+    });
+
+    if (!result.data) {
+      throw new Error('Servidor não retornou o resultado da limpeza');
     }
 
-    // 2. Limpa cache local do navegador
-    localStorage.removeItem(STORAGE_KEYS.MACHINES);
-    localStorage.removeItem(STORAGE_KEYS.TOTAL_VISITS);
-    localStorage.removeItem(STORAGE_KEYS.TESTS_COUNT);
-    localStorage.removeItem(STORAGE_KEYS.TESTS_HISTORY);
-
     sessionStartTime = Date.now();
-    notifyListeners();
+    applyServerData(result.data);
   }
+
 
   // Reseta todos os dados
   function resetAll() {

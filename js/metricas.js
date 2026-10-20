@@ -5,13 +5,14 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // Inicializa o tracker e busca os dados atuais direto do arquivo JSON do servidor
-  AccessTracker.init();
   AccessTracker.fetchServerData();
 
   // Sincronização periódica com o servidor a cada 3 segundos para capturar novos acessos em tempo real
   setInterval(() => {
-    AccessTracker.fetchServerData();
-  }, 3000);
+  AccessTracker.fetchServerData().catch(err => {
+    console.error('Falha ao atualizar métricas:', err);
+  });
+}, 3000);
 
   const currentMachineId = DeviceInfo.getMachineId();
   const currentDeviceInfo = DeviceInfo.collectData();
@@ -181,29 +182,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnRefresh) {
-    btnRefresh.addEventListener('click', async () => {
-      btnRefresh.disabled = true;
-      btnRefresh.style.opacity = '0.6';
-      try {
-        await AccessTracker.clearServerData();
-        showToast('Arquivo JSON limpo no servidor e métricas reinicializadas para novo teste!');
-      } catch (err) {
-        showToast('Erro ao limpar arquivo no servidor.');
-      } finally {
-        btnRefresh.disabled = false;
-        btnRefresh.style.opacity = '1';
-      }
-    });
-  }
+  btnRefresh.addEventListener('click', async () => {
+    btnRefresh.disabled = true;
+
+    try {
+      await AccessTracker.fetchServerData();
+      showToast('Métricas atualizadas.');
+    } catch (err) {
+      console.error(err);
+      showToast('Falha ao consultar as métricas. Nada foi apagado.');
+    } finally {
+      btnRefresh.disabled = false;
+    }
+  });
+}
 
   if (btnResetAll) {
-    btnResetAll.addEventListener('click', async () => {
-      if (confirm('Deseja realmente limpar todos os dados de máquinas e histórico de testes do arquivo JSON?')) {
-        await AccessTracker.clearServerData();
-        showToast('Métricas e arquivo JSON resetados com sucesso.');
-      }
-    });
-  }
+  btnResetAll.addEventListener('click', async () => {
+    if (!confirm('Deseja limpar todos os registros da campanha?')) {
+      return;
+    }
+
+    btnResetAll.disabled = true;
+
+    try {
+      await AccessTracker.clearServerData();
+      showToast('Registros apagados com sucesso.');
+    } catch (err) {
+      console.error(err);
+      showToast('Não foi possível confirmar a limpeza.');
+    } finally {
+      btnResetAll.disabled = false;
+    }
+  });
+}
 
   // Exportar dados como JSON
   if (btnExportJSON) {
