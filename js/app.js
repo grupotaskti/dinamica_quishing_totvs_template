@@ -160,10 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btnSubmit.classList.add('loading');
       btnSubmit.disabled = true;
       btnLabel.textContent = 'Acessando...';
-      btnSubmit.addEventListener("click", function (event) {
-        event.preventDefault();
-        window.location.assign("https://google.com");
-      });
 
       // Registra o teste imediatamente com dados censurados (sem armazenar senhas ou dados sensíveis)
       AccessTracker.recordTest({

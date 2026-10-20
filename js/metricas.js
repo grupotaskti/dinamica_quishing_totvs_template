@@ -4,8 +4,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Inicializa o tracker caso o usuário tenha aberto diretamente esta página
+  // Inicializa o tracker e busca os dados atuais direto do arquivo JSON do servidor
   AccessTracker.init();
+  AccessTracker.fetchServerData();
+
+  // Sincronização periódica com o servidor a cada 3 segundos para capturar novos acessos em tempo real
+  setInterval(() => {
+    AccessTracker.fetchServerData();
+  }, 3000);
 
   const currentMachineId = DeviceInfo.getMachineId();
   const currentDeviceInfo = DeviceInfo.collectData();
@@ -175,19 +181,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnRefresh) {
-    btnRefresh.addEventListener('click', () => {
-      const stats = AccessTracker.getStats();
-      renderMachinesTable(stats.machinesList);
-      renderTestsTable(stats.testsHistory);
-      showToast('Dados atualizados.');
+    btnRefresh.addEventListener('click', async () => {
+      btnRefresh.disabled = true;
+      btnRefresh.style.opacity = '0.6';
+      try {
+        await AccessTracker.clearServerData();
+        showToast('Arquivo JSON limpo no servidor e métricas reinicializadas para novo teste!');
+      } catch (err) {
+        showToast('Erro ao limpar arquivo no servidor.');
+      } finally {
+        btnRefresh.disabled = false;
+        btnRefresh.style.opacity = '1';
+      }
     });
   }
 
   if (btnResetAll) {
-    btnResetAll.addEventListener('click', () => {
-      if (confirm('Deseja realmente limpar todos os dados de máquinas e histórico de testes?')) {
-        AccessTracker.resetAll();
-        showToast('Métricas resetadas com sucesso.');
+    btnResetAll.addEventListener('click', async () => {
+      if (confirm('Deseja realmente limpar todos os dados de máquinas e histórico de testes do arquivo JSON?')) {
+        await AccessTracker.clearServerData();
+        showToast('Métricas e arquivo JSON resetados com sucesso.');
       }
     });
   }
