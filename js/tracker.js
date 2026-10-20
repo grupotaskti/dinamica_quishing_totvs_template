@@ -181,35 +181,9 @@ const AccessTracker = (() => {
     return result.test;
   }
 
-    let history = loadJSON(STORAGE_KEYS.TESTS_HISTORY, []);
-    history.unshift(record);
-    if (history.length > 50) history.pop();
-    saveJSON(STORAGE_KEYS.TESTS_HISTORY, history);
-    notifyListeners();
-
-    // Envia assincronamente ao servidor para salvar no arquivo JSON
-    // keepalive: true assegura envio mesmo com redirecionamento de tela
-    try {
-      fetch('/api/record-test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          timeOnly,
-          maskedUser: masked,
-          status: 'Tentativa Registrada (Teste)',
-          machineId: currentMachineId
-        }),
-        keepalive: true
-      }).catch(err => console.warn('Erro ao salvar teste no servidor:', err));
-    } catch (e) {
-      // fallback
-    }
-
-    return record;
-  }
 
   // Simula o acesso de uma nova máquina para validação e testes
-  async function simulateNewMachine() {
+async function simulateNewMachine() {
     const syntheticId = 'SIM-' + Math.random().toString(36).substring(2, 8).toUpperCase();
     const simulatedOS = ['Windows 11', 'macOS Sonoma', 'Ubuntu Linux', 'Android 14', 'iOS 17'][Math.floor(Math.random() * 5)];
     const simulatedBrowsers = ['Chrome 128', 'Edge 128', 'Firefox 130', 'Safari 18'][Math.floor(Math.random() * 4)];
@@ -361,5 +335,6 @@ const AccessTracker = (() => {
     module.exports = api;
   }
 
+  return api;
   return api;
 })();
