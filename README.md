@@ -345,3 +345,4 @@ Estas são recomendações; nenhuma foi aplicada ao código por esta atualizaç�
 ## 17. Licença e identidade visual
 
 O manifesto declara `MIT`, mas um arquivo de licença não foi apresentado para revisão. Essa declaração não comprova autorização de uso de marcas, logotipos ou outros materiais de terceiros. Confirmar as permissões e a identificação da campanha antes da publicação.
+ 
